@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from random import randint
 from celery import shared_task
+from celery.result import AsyncResult
+from celery.signals import task_failure, task_success, task_retry, task_postrun
 from PIL import Image, ImageDraw
 from mockuper import models
 
@@ -19,4 +21,17 @@ def create_mockup(text, input_path, task_id=None):
     # save the image to the database
     mockup_image = models.MockupImage.objects.create(
         text=text, url='media/mockups/' + file_name, task_id=task_id)
-    return mockup_image.id
+    return task_id
+
+@task_success.connect(sender=create_mockup)
+def task_success_notifier(**kwargs):
+    task = models.MockupTask.objects.get(id=kwargs['result'])
+    task.status = 'SUCCESS'
+    task.save()
+
+@task_failure.connect(sender=create_mockup)
+def task_failure_notifier(**kwargs):
+    task = models.MockupTask.objects.get(id=kwargs['result'])
+    task.status = 'FAILURE'
+    task.save()
+
