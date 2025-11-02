@@ -8,8 +8,8 @@ class MockupTask(models.Model):
         'FAILURE': 'Failure',
         'SUCCESS': 'Success' 
     }
-    task_id = models.UUIDField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    task_id = models.UUIDField(null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
 
 
 class MockupImage(models.Model):
