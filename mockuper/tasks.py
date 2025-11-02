@@ -9,7 +9,7 @@ load_dotenv()
 
 
 @shared_task
-def create_mockup(text, input_path):
+def create_mockup(text, input_path, task_id=None):
     img = Image.open(input_path)
     painter = ImageDraw.Draw(img)
     painter.text((300, 300), text, fill=(255, 0, 0))
@@ -17,5 +17,6 @@ def create_mockup(text, input_path):
     path_to_save = os.environ.get('GENERATED_IMAGES') + file_name
     img.save(path_to_save)
     # save the image to the database
-    mockup_image = models.MockupImage.objects.create(text=text, url='media/mockups/' + file_name)
+    mockup_image = models.MockupImage.objects.create(
+        text=text, url='media/mockups/' + file_name, task_id=task_id)
     return mockup_image.id
