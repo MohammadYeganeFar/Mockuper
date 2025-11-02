@@ -16,3 +16,5 @@ class MockupImage(models.Model):
     text = models.TextField()
     url = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    task = models.ForeignKey(
+        MockupTask, null=True,on_delete=models.SET_NULL, related_name='images')
