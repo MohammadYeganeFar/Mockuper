@@ -53,7 +53,7 @@ def generate_mockup_shirt(request):
 @api_view(['GET'])
 def get_task_status(request, task_uuid):
     task = get_object_or_404(models.MockupTask, task_uuid=task_uuid)
-    serializer = serializers.MockupTaskSerializer(task)
+    serializer = serializers.MockupTaskSerializer(task, context={'request': request})
     return Response(serializer.data, status.HTTP_200_OK)
 
 @api_view(['GET'])
