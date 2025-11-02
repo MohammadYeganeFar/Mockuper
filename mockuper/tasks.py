@@ -7,18 +7,20 @@ from celery.signals import task_failure, task_success
 from PIL import Image, ImageDraw
 from django.core.exceptions import ObjectDoesNotExist
 from mockuper import models
+from mockuper.utils import get_a_font_object
 
 load_dotenv()
 logger = getLogger(__name__)
 
 
 @shared_task
-def create_mockup(text, input_path, task_id=None):
+def create_mockup(text, input_path, font, task_id=None):
     """Create a mockup image by overlaying text on an input image."""
     try:
         img = Image.open(input_path)
         painter = ImageDraw.Draw(img)
-        painter.text((300, 300), text, fill=(255, 0, 0))
+        font_object = get_a_font_object(font)
+        painter.text((200, 160), text, fill=(255, 0, 0), font=font_object)
         
         file_name = f'generated_image{randint(1, 1000)}.png'
         base_path = os.environ.get('GENERATED_IMAGES', '')

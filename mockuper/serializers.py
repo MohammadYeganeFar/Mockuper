@@ -3,10 +3,11 @@ from mockuper import models
 
 
 class MockupImageSerializer(serializers.ModelSerializer):
+    font = serializers.CharField()
 
     class Meta:
         model = models.MockupImage
-        fields = ['text']
+        fields = ['text', 'font']
 
 
 class MockupTaskSerializer(serializers.ModelSerializer):

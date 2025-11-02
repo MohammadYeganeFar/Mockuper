@@ -6,9 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from celery import group
 from celery.result import AsyncResult
-from mockuper import serializers
-from mockuper import tasks
-from mockuper import models
+from mockuper import serializers, tasks, models
 
 logger = getLogger(__name__)
 
@@ -18,7 +16,8 @@ def generate_mockup_shirt(request):
     # Serializing the data
     serializer = serializers.MockupImageSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    text = request.data['text']
+    text = serializer.validated_data['text']
+    font = serializer.validated_data['font']
 
     try:
         # Creating the tasks
@@ -29,7 +28,7 @@ def generate_mockup_shirt(request):
         task = models.MockupTask.objects.create()
 
         # Creating the tasks signatures
-        tasks_signatures = [tasks.create_mockup.s(text, path, task.id) for path in images_abs_path]
+        tasks_signatures = [tasks.create_mockup.s(text, path, font, task.id) for path in images_abs_path]
         # Creating the multiple mockup tasks
         multiple_mockup_tasks = group(tasks_signatures)
         # Executing the tasks
