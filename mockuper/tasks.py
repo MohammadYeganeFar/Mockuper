@@ -37,6 +37,9 @@ def create_mockup(text, input_path, task_id=None):
         )
         
         return task_id
+    except (IOError, OSError) as e:
+        logger.error(f"File operation error creating mockup: {str(e)}", exc_info=True)
+        raise
     except Exception as e:
         logger.error(f"Error creating mockup: {str(e)}", exc_info=True)
         raise
