@@ -41,16 +41,40 @@ def create_mockup(text, input_path, task_id=None):
         logger.error(f"Error creating mockup: {str(e)}", exc_info=True)
         raise
 
-
 @task_success.connect(sender=create_mockup)
-def task_success_notifier(**kwargs):
-    task = models.MockupTask.objects.get(id=kwargs['result'])
-    task.status = 'SUCCESS'
-    task.save()
+def task_success_notifier(sender=None, **kwargs):
+    """Update MockupTask status to SUCCESS when task completes successfully."""
+    try:
+        db_task_id = kwargs.get('retval')
+        if db_task_id:
+            task = models.MockupTask.objects.get(id=db_task_id)
+            task.status = 'SUCCESS'
+            task.save()
+    except ObjectDoesNotExist:
+        logger.warning(f"MockupTask with id {kwargs.get('retval')} not found")
+    except Exception as e:
+        logger.error(f"Error in task_success_notifier: {str(e)}", exc_info=True)
+
 
 @task_failure.connect(sender=create_mockup)
-def task_failure_notifier(**kwargs):
-    task = models.MockupTask.objects.get(id=kwargs['result'])
-    task.status = 'FAILURE'
-    task.save()
+def task_failure_notifier(sender=None, task_id=None, **kwargs):
+    """Update MockupTask status to FAILURE when task fails."""
+    try:
+        # Extract the database task_id from the task's request context
+        # The task_id parameter passed to create_mockup is stored in the request
+        request = kwargs.get('request')
+        if request and hasattr(request, 'kwargs'):
+            db_task_id = request.kwargs.get('task_id') or request.args[2] if len(request.args) > 2 else None
+        else:
+            # Fallback: try to get from task_id in kwargs (this won't work for database ID)
+            db_task_id = kwargs.get('task_id')
+        
+        if db_task_id:
+            task = models.MockupTask.objects.get(id=db_task_id)
+            task.status = 'FAILURE'
+            task.save()
+    except (ObjectDoesNotExist, AttributeError, IndexError, TypeError):
+        logger.warning(f"Could not update MockupTask status for failure - task_id: {kwargs.get('task_id')}")
+    except Exception as e:
+        logger.error(f"Error in task_failure_notifier: {str(e)}", exc_info=True)
 
