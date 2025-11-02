@@ -20,8 +20,13 @@ class MockupTaskSerializer(serializers.ModelSerializer):
         images = obj.images.all()
         data = [
             {
-                "image_url": image.url,
+                "image_url": 'http://127.0.0.1:8000/' + image.url,
                 "created_at": image.created_at,
             } for image in images
         ]
         return data
+
+class MockupImageHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.MockupImage
+        fields = ['id', 'text', 'url', 'created_at']
