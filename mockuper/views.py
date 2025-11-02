@@ -17,30 +17,33 @@ def generate_mockup_shirt(request):
     serializer.is_valid(raise_exception=True)
     text = request.data['text']
 
-    # Creating the tasks
-    files = os.listdir('mockuper/shirt_images')
-    images_abs_path = [os.environ.get('SAMPLE_IMAGES') + file for file in files]
+    try:
+        # Creating the tasks
+        files = os.listdir('mockuper/shirt_images')
+        images_abs_path = [os.environ.get('SAMPLE_IMAGES') + file for file in files]
 
-    # Saving the task to the database
-    task = models.MockupTask.objects.create()
+        # Saving the task to the database
+        task = models.MockupTask.objects.create()
 
-    # Creating the tasks signatures
-    tasks_signatures = [tasks.create_mockup.s(text, path, task.id) for path in images_abs_path]
-    # Creating the multiple mockup tasks
-    multiple_mockup_tasks = group(tasks_signatures)
-    # Executing the tasks
-    executed_tasks = multiple_mockup_tasks.delay()
+        # Creating the tasks signatures
+        tasks_signatures = [tasks.create_mockup.s(text, path, task.id) for path in images_abs_path]
+        # Creating the multiple mockup tasks
+        multiple_mockup_tasks = group(tasks_signatures)
+        # Executing the tasks
+        executed_tasks = multiple_mockup_tasks.delay()
 
-    task.task_uuid = executed_tasks.id
-    res = AsyncResult(executed_tasks.id)
-    task.status = res.state
-    task.save()
-    data = {
-        'task_uuid': executed_tasks.id,
-        'status': res.state,
-        'message': 'ساخت تصویر آغاز شد'
-    }
-    return Response(data, status.HTTP_201_CREATED)
+        task.task_uuid = executed_tasks.id
+        res = AsyncResult(executed_tasks.id)
+        task.status = res.state
+        task.save()
+        data = {
+            'task_uuid': executed_tasks.id,
+            'status': res.state,
+            'message': 'ساخت تصویر آغاز شد'
+        }
+        return Response(data, status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def get_task_status(request, task_uuid):
@@ -50,6 +53,6 @@ def get_task_status(request, task_uuid):
 
 @api_view(['GET'])
 def mockups_history(request):
-    images = models.MockupImage.objects.all()
+    images = models.MockupImage.objects.all().order_by('-created_at')
     serializer = serializers.MockupImageHistorySerializer(images, many=True)
     return Response(serializer.data, status.HTTP_200_OK)
