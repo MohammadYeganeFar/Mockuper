@@ -1,4 +1,5 @@
 import os
+from logging import getLogger
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -8,6 +9,8 @@ from celery.result import AsyncResult
 from mockuper import serializers
 from mockuper import tasks
 from mockuper import models
+
+logger = getLogger(__name__)
 
 
 @api_view(['POST'])
@@ -41,8 +44,10 @@ def generate_mockup_shirt(request):
             'status': res.state,
             'message': 'ساخت تصویر آغاز شد'
         }
+        logger.info(f"Mockup task group created: {executed_tasks.id}")
         return Response(data, status.HTTP_201_CREATED)
     except Exception as e:
+        logger.error(f"Error creating mockup task: {str(e)}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
