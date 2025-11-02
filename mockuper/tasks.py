@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
 from random import randint
-from celery import shared_task , group
+from celery import shared_task
 from PIL import Image, ImageDraw
+from mockuper import models
 
 load_dotenv()
 
@@ -12,6 +13,9 @@ def create_mockup(text, input_path):
     img = Image.open(input_path)
     painter = ImageDraw.Draw(img)
     painter.text((300, 300), text, fill=(255, 0, 0))
-    path_to_save = os.environ.get('GENERATED_IMAGES') + str(randint(1, 1000)) + '.png'
+    file_name = 'generated_image' + str(randint(1, 1000)) + '.png'
+    path_to_save = os.environ.get('GENERATED_IMAGES') + file_name
     img.save(path_to_save)
-    return 1
+    # save the image to the database
+    mockup_image = models.MockupImage.objects.create(text=text, url='media/mockups/' + file_name)
+    return mockup_image.id
