@@ -47,3 +47,9 @@ def get_task_status(request, task_uuid):
     task = get_object_or_404(models.MockupTask, task_uuid=task_uuid)
     serializer = serializers.MockupTaskSerializer(task)
     return Response(serializer.data, status.HTTP_200_OK)
+
+@api_view(['GET'])
+def mockups_history(request):
+    images = models.MockupImage.objects.all()
+    serializer = serializers.MockupImageHistorySerializer(images, many=True)
+    return Response(serializer.data, status.HTTP_200_OK)
