@@ -18,9 +18,11 @@ def create_mockup(text, input_path, task_id=None):
     file_name = 'generated_image' + str(randint(1, 1000)) + '.png'
     path_to_save = os.environ.get('GENERATED_IMAGES') + file_name
     img.save(path_to_save)
+
     # save the image to the database
+    image_url = os.environ.get('MEDIA_URL_PREFIX') + file_name
     mockup_image = models.MockupImage.objects.create(
-        text=text, url='media/mockups/' + file_name, task_id=task_id)
+        text=text, url=image_url, task_id=task_id)
     return task_id
 
 @task_success.connect(sender=create_mockup)
