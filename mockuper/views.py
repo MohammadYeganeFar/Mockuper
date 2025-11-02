@@ -1,4 +1,5 @@
 import os
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -29,14 +30,20 @@ def generate_mockup_shirt(request):
     multiple_mockup_tasks = group(tasks_signatures)
     # Executing the tasks
     executed_tasks = multiple_mockup_tasks.delay()
-    
-    task.task_id = executed_tasks.id
+
+    task.task_uuid = executed_tasks.id
     res = AsyncResult(executed_tasks.id)
     task.status = res.state
     task.save()
     data = {
-        'task_id': executed_tasks.id,
+        'task_uuid': executed_tasks.id,
         'status': res.state,
         'message': 'ساخت تصویر آغاز شد'
     }
     return Response(data, status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+def get_task_status(request, task_uuid):
+    task = get_object_or_404(models.MockupTask, task_uuid=task_uuid)
+    serializer = serializers.MockupTaskSerializer(task)
+    return Response(serializer.data, status.HTTP_200_OK)
