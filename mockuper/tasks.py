@@ -45,13 +45,14 @@ def create_mockup(text, input_path, task_id=None):
 def task_success_notifier(sender=None, **kwargs):
     """Update MockupTask status to SUCCESS when task completes successfully."""
     try:
-        db_task_id = kwargs.get('retval')
+        db_task_id = kwargs.get('result')
+        print(f'kwargs.get("result"): {kwargs}')
         if db_task_id:
             task = models.MockupTask.objects.get(id=db_task_id)
             task.status = 'SUCCESS'
             task.save()
     except ObjectDoesNotExist:
-        logger.warning(f"MockupTask with id {kwargs.get('retval')} not found")
+        logger.warning(f"MockupTask with id {kwargs.get('result')} not found")
     except Exception as e:
         logger.error(f"Error in task_success_notifier: {str(e)}", exc_info=True)
 
