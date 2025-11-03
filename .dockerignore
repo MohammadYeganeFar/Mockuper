@@ -1,0 +1,50 @@
+.dev.env
+/media
+
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.build/
+dist/
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Django runtime/media
+media/
+staticfiles/
+celerybeat-schedule
+celerybeat.pid
+
+# Env and config secrets
+.env
+*.env
+*.env.*
+!.dev.env  # keep if you want to send dev vars during builds
+
+# IDE / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Caches
+.cache/
+pip-wheel-metadata/
+
+# Docker artifacts
+docker-compose.override.yml
