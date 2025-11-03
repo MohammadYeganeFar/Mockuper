@@ -80,4 +80,4 @@ class ViewsAPITests(TestCase):
         response = views.mockups_history(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response.data, list)
+        self.assertIsInstance(response.data['results'], list)
