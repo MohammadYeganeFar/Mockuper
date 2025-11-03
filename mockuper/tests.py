@@ -74,3 +74,10 @@ class ViewsAPITests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('task_uuid'), task.task_uuid)
+    
+    def test_mockups_history_returns_200_and_list(self):
+        request = self.factory.get('/api/v1/mockups/')
+        response = views.mockups_history(request)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, list)
