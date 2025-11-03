@@ -1,3 +1,4 @@
+import tabnanny
 from unittest.mock import patch, MagicMock
 import os
 from django.test import TestCase
@@ -63,3 +64,13 @@ class ViewsAPITests(TestCase):
             models.MockupTask.objects.filter(
                 task_uuid='0d93d887-7a9d-4619-ba6d-be9531f5c087').exists(), response.data)
 
+    def test_get_task_status_returns_200(self):
+        # Create a task with a known UUID
+        task_uuid = '0d93d887-7a9d-4619-ba6d-be9531f5c087'
+        task = models.MockupTask.objects.create(task_uuid=task_uuid, status='PENDING')
+
+        request = self.factory.get(f'/api/v1/tasks/{task.task_uuid}/')
+        response = views.get_task_status(request, task_uuid=task.task_uuid)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('task_uuid'), task.task_uuid)
