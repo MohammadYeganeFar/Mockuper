@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from celery import group
 from celery.result import AsyncResult
 from mockuper import serializers, tasks, models
@@ -58,5 +59,17 @@ def get_task_status(request, task_uuid):
 @api_view(['GET'])
 def mockups_history(request):
     images = models.MockupImage.objects.all().order_by('-created_at')
-    serializer = serializers.MockupImageHistorySerializer(images, many=True)
-    return Response(serializer.data, status.HTTP_200_OK)
+    paginator = PageNumberPagination()
+    # Allow clients to control page size with a sensible default
+    page_size = request.query_params.get('page_size')
+    if page_size is not None:
+        try:
+            paginator.page_size = max(1, min(int(page_size), 100))
+        except (TypeError, ValueError):
+            paginator.page_size = 10
+    else:
+        paginator.page_size = 10
+
+    page = paginator.paginate_queryset(images, request)
+    serializer = serializers.MockupImageHistorySerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
