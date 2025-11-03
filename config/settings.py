@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # Third party packages
     'rest_framework',
+    'drf_spectacular',
 
     # Apps
     'mockuper',
@@ -141,3 +142,14 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = 'media/'
+
+# DRF / Schema
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mockuper API',
+    'DESCRIPTION': 'API for generating and browsing mockup images',
+    'VERSION': '1.0.0',
+}
