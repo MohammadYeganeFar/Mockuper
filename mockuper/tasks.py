@@ -51,7 +51,6 @@ def task_success_notifier(sender=None, **kwargs):
     """Update MockupTask status to SUCCESS when task completes successfully."""
     try:
         db_task_id = kwargs.get('result')
-        print(f'kwargs.get("result"): {kwargs}')
         if db_task_id:
             task = models.MockupTask.objects.get(id=db_task_id)
             task.status = 'SUCCESS'
