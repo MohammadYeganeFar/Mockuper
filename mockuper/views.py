@@ -8,6 +8,8 @@ from rest_framework.pagination import PageNumberPagination
 from celery import group
 from celery.result import AsyncResult
 from mockuper import serializers, tasks, models
+from django.utils.dateparse import parse_datetime, parse_date
+from django.db.models import Q
 
 logger = getLogger(__name__)
 
@@ -58,7 +60,37 @@ def get_task_status(request, task_uuid):
 
 @api_view(['GET'])
 def mockups_history(request):
-    images = models.MockupImage.objects.all().order_by('-created_at')
+    images = models.MockupImage.objects.all()
+
+    # Filtering
+    q = request.query_params.get('q')
+    if q:
+        images = images.filter(Q(text__icontains=q) | Q(url__icontains=q))
+
+    task_uuid = request.query_params.get('task_uuid')
+    if task_uuid:
+        images = images.filter(task__task_uuid=task_uuid)
+
+    task_id = request.query_params.get('task_id')
+    if task_id:
+        try:
+            images = images.filter(task__id=int(task_id))
+        except (TypeError, ValueError):
+            pass
+
+    created_from = request.query_params.get('from')
+    created_to = request.query_params.get('to')
+    if created_from:
+        # accept date or datetime
+        dt = parse_datetime(created_from) or parse_date(created_from)
+        if dt:
+            images = images.filter(created_at__gte=dt)
+    if created_to:
+        dt = parse_datetime(created_to) or parse_date(created_to)
+        if dt:
+            images = images.filter(created_at__lte=dt)
+
+    images = images.order_by('-created_at')
     paginator = PageNumberPagination()
     # Allow clients to control page size with a sensible default
     page_size = request.query_params.get('page_size')
