@@ -14,6 +14,17 @@ def get_a_font_object(font='roboto', size=30):
         font_object = ImageFont.truetype(font_path, size)
     return font_object
 
+def get_size(start_path = '.'):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            # skip if it is symbolic link
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+
+    return total_size / (1024 * 1024)
+
 COLOR_MAP = {
     "aliceblue": "#f0f8ff",
     "antiquewhite": "#faebd7",
