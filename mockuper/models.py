@@ -17,6 +17,7 @@ class MockupTask(models.Model):
 
 class MockupImage(models.Model):
     text = models.TextField()
+    color = models.CharField(max_length=150, default='red')
     url = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     task = models.ForeignKey(
