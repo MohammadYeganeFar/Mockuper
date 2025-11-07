@@ -7,7 +7,7 @@ from celery.signals import task_failure, task_success
 from PIL import Image, ImageDraw
 from django.core.exceptions import ObjectDoesNotExist
 from mockuper import models
-from mockuper.utils import get_a_font_object
+from mockuper.utils import get_a_font_object, get_size
 
 load_dotenv()
 logger = getLogger(__name__)
@@ -17,6 +17,13 @@ logger = getLogger(__name__)
 def create_mockup(text, input_path, font, color,task_id=None):
     """Create a mockup image by overlaying text on an input image."""
     try:
+        # Checking size of media dir
+        media_dir_size = get_size(os.environ.get('GENERATED_IMAGES', ''))
+        if media_dir_size > 100: # MB
+            raise ValueError('Size of media dir is more than 100MB')
+        if media_dir_size > 50: # MB
+            print(f'WARNING: size of media dir is more than 50MB. It is {media_dir_size}MB')
+
         img = Image.open(input_path)
         painter = ImageDraw.Draw(img)
         font_object = get_a_font_object(font)
