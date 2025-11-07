@@ -41,4 +41,4 @@ class MockupTaskSerializer(serializers.ModelSerializer):
 class MockupImageHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MockupImage
-        fields = ['id', 'text', 'url', 'created_at']
+        fields = ['id', 'text', 'font', 'color', 'url', 'created_at']
