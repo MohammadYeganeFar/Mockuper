@@ -1,13 +1,20 @@
 from rest_framework import serializers
 from mockuper import models
+from mockuper.utils import COLOR_MAP
 
 
 class MockupImageSerializer(serializers.ModelSerializer):
     font = serializers.CharField()
+    color = serializers.CharField()
 
     class Meta:
         model = models.MockupImage
-        fields = ['text', 'font']
+        fields = ['text', 'font', 'color']
+
+    def validate_color(self, value):
+        if value in COLOR_MAP.keys() or value in COLOR_MAP.values():
+            return value
+        raise serializers.ValidationError(f'Color {value} is not a valid color!')
 
 
 class MockupTaskSerializer(serializers.ModelSerializer):

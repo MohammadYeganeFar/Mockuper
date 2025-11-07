@@ -19,8 +19,6 @@ def generate_mockup_shirt(request):
     # Serializing the data
     serializer = serializers.MockupImageSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    text = serializer.validated_data['text']
-    font = serializer.validated_data['font']
 
     try:
         # Creating the tasks
@@ -31,7 +29,12 @@ def generate_mockup_shirt(request):
         task = models.MockupTask.objects.create()
 
         # Creating the tasks signatures
-        tasks_signatures = [tasks.create_mockup.s(text, path, font, task.id) for path in images_abs_path]
+        tasks_signatures = [
+            tasks.create_mockup.s(
+                input_path=path, 
+                task_id=task.id, 
+                **serializer.validated_data
+            ) for path in images_abs_path]
         # Creating the multiple mockup tasks
         multiple_mockup_tasks = group(tasks_signatures)
         # Executing the tasks

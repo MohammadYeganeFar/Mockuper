@@ -14,13 +14,13 @@ logger = getLogger(__name__)
 
 
 @shared_task
-def create_mockup(text, input_path, font, task_id=None):
+def create_mockup(text, input_path, font, color,task_id=None):
     """Create a mockup image by overlaying text on an input image."""
     try:
         img = Image.open(input_path)
         painter = ImageDraw.Draw(img)
         font_object = get_a_font_object(font)
-        painter.text((200, 160), text, fill=(255, 0, 0), font=font_object)
+        painter.text((200, 160), text, fill=color, font=font_object)
         
         file_name = f'generated_image{randint(1, 1000)}.png'
         base_path = os.environ.get('GENERATED_IMAGES', '')
