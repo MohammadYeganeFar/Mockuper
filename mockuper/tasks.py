@@ -41,6 +41,8 @@ def create_mockup(text, input_path, font, color,task_id=None):
         
         models.MockupImage.objects.create(
             text=text,
+            font=font,
+            color=color,
             url=image_url,
             task_id=task_id
         )
